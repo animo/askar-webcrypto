@@ -1,0 +1,34 @@
+{
+  "name": "askar-webcrypto",
+  "version": "0.0.0",
+  "main": "build/index.js",
+  "author": "Animo Solutions <development@animo.id> (https://animo.id)",
+  "repository": {
+    "url": "https://github.com/animo/askar-webcrypto",
+    "type": "git"
+  },
+  "homepage": "https://github.com/animo/askar-webcrypto",
+  "bugs": {
+    "url": "https://github.com/animo/askar-webcrypto/issues",
+    "email": "development@animo.id"
+  },
+  "scripts": {
+    "build": "tsc",
+    "format": "biome format .",
+    "format:fix": "pnpm format --write",
+    "lint": "biome lint .",
+    "lint:fix": "pnpm lint --write --unsafe",
+    "check-types": "pnpm build --noEmit",
+    "test": "node --import tsx --test ./tests/*.test.ts"
+  },
+  "dependencies": {
+    "@hyperledger/aries-askar-shared": "^0.2.1",
+    "webcrypto-core": "^1.8.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.8.1",
+    "@hyperledger/aries-askar-nodejs": "^0.2.1",
+    "tsx": "^4.15.2",
+    "typescript": "~5.4.5"
+  }
+}
