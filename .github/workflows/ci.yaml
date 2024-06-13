@@ -1,0 +1,51 @@
+name: "Pipeline"
+
+on:
+  push:
+    branches: [main]
+
+  pull_request:
+    types: [opened, synchronize]
+
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: "Type of release (major, minor, patch, alpha)"
+        required: true
+        default: alpha
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+          - alpha
+
+jobs:
+  continous-integration:
+    name: "Continuous Integration"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Format 
+        run: pnpm format
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+      - name: Check types
+        run: pnpm check-types
+
+      - name: Test
+        run: pnpm test
