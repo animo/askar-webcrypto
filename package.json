@@ -23,11 +23,17 @@
   },
   "dependencies": {
     "@hyperledger/aries-askar-shared": "^0.2.1",
+    "@noble/hashes": "^1.4.0",
+    "@peculiar/asn1-ecc": "^2.3.8",
+    "@peculiar/asn1-schema": "^2.3.8",
+    "@peculiar/asn1-x509": "^2.3.8",
     "webcrypto-core": "^1.8.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.1",
     "@hyperledger/aries-askar-nodejs": "^0.2.1",
+    "@peculiar/x509": "^1.11.0",
+    "@types/node": "^20.14.2",
     "tsx": "^4.15.2",
     "typescript": "~5.4.5"
   }
