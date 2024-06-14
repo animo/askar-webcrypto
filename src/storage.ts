@@ -12,14 +12,20 @@ export function getCryptoKey(key: core.CryptoKey) {
   return res
 }
 
-export function setCryptoKey(askarKey: AskarKey, keyType: KeyType, extractable = false) {
+export function setCryptoKey({
+  extractable,
+  askarKey,
+  keyType,
+  keyUsages,
+}: {
+  askarKey: AskarKey
+  keyType: KeyType
+  extractable: boolean
+  keyUsages: KeyUsage[]
+}) {
   const webCryptoAlgorithm = askarAlgorithmToWebCryptoAlgorithm(askarKey.algorithm)
 
-  const keyUsage: KeyUsage[] = []
-  if (keyType === 'public') keyUsage.push('verify')
-  if (keyType === 'secret' || keyType === 'private') keyUsage.push('sign')
-
-  const key = core.CryptoKey.create(webCryptoAlgorithm, keyType, extractable, keyUsage)
+  const key = core.CryptoKey.create(webCryptoAlgorithm, keyType, extractable, keyUsages)
 
   Object.freeze(key)
 

@@ -21,7 +21,7 @@ const generateAsymmetricKeyTest = (crypto: Crypto) => (algorithm: Record<string,
       ])) as CryptoKeyPair
 
       equal(key.publicKey.type, 'public')
-      equal(key.privateKey.type, 'secret')
+      equal(key.privateKey.type, 'private')
     })
 
     it('sign', async () => {

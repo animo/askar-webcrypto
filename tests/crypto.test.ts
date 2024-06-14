@@ -26,6 +26,35 @@ describe('crypto', async () => {
     })
   })
 
+  describe('equal to node', async () => {
+    const c = require('node:crypto') as Crypto
+
+    const p256KeyNodeJs = await c.subtle.generateKey(
+      {
+        name: 'ECDSA',
+        namedCurve: 'P-256',
+      },
+      true,
+      ['sign', 'verify']
+    )
+
+    const p256KeyAskar = await new Crypto().subtle.generateKey(
+      {
+        name: 'ECDSA',
+        namedCurve: 'P-256',
+      },
+      true,
+      ['sign', 'verify']
+    )
+
+    const publicKeyNodejs = await c.subtle.exportKey('raw', p256KeyNodeJs.publicKey)
+    const publicKeyAskar = await new Crypto().subtle.exportKey('raw', p256KeyAskar.publicKey)
+
+    // 33 for compressed format and 65 for uncompressed
+    strictEqual(publicKeyAskar.byteLength, 33)
+    strictEqual(publicKeyNodejs.byteLength, 65)
+  })
+
   generateAsymmetricKeyTests(new Crypto(), [
     { name: 'ed25519' },
     { name: 'ECDSA', namedCurve: 'P-256', hash: { name: 'SHA-256' } },
