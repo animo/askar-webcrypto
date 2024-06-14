@@ -1,5 +1,6 @@
 import * as core from 'webcrypto-core'
 import { type Key as AskarKey, KeyAlgs } from '@hyperledger/aries-askar-shared'
+import type { KeyType, KeyUsage } from './types'
 
 const keyStorage = new WeakMap<core.CryptoKey, AskarKey>()
 
@@ -11,13 +12,24 @@ export function getCryptoKey(key: core.CryptoKey) {
   return res
 }
 
-export function setCryptoKey(value: AskarKey) {
-  const webCryptoAlgorithm = askarAlgorithmToWebCryptoAlgorithm(value.algorithm)
-  const key = core.CryptoKey.create(webCryptoAlgorithm, 'secret', false, ['sign', 'verify'])
+export function setCryptoKey({
+  extractable,
+  askarKey,
+  keyType,
+  keyUsages,
+}: {
+  askarKey: AskarKey
+  keyType: KeyType
+  extractable: boolean
+  keyUsages: KeyUsage[]
+}) {
+  const webCryptoAlgorithm = askarAlgorithmToWebCryptoAlgorithm(askarKey.algorithm)
+
+  const key = core.CryptoKey.create(webCryptoAlgorithm, keyType, extractable, keyUsages)
 
   Object.freeze(key)
 
-  keyStorage.set(key, value)
+  keyStorage.set(key, askarKey)
 
   return key
 }

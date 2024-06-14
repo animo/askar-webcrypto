@@ -1,26 +1,103 @@
+import { AsnConvert, AsnParser } from '@peculiar/asn1-schema'
+import { SubjectPublicKeyInfo } from '@peculiar/asn1-x509'
+import { ecdsaWithSHA256 } from '@peculiar/asn1-ecc'
 import * as core from 'webcrypto-core'
-import { askarKeyGenerate, askarKeySign, askarKeyVerify } from './askar'
-import type { CryptoKeyPair } from './types'
+import {
+  askarExportKeyToJwk,
+  askarKeyFromSecretBytes,
+  askarKeyFromPublicBytes,
+  askarKeyGenerate,
+  askarKeyGetPublicBytes,
+  askarKeySign,
+  askarKeyVerify,
+  askarKeyFromJwk,
+} from './askar'
+import type {
+  CryptoKeyPair,
+  EcKeyGenParams,
+  EcKeyImportParams,
+  EcdsaParams,
+  JsonWebKey,
+  KeyFormat,
+  KeyUsage,
+} from './types'
 
-export class Ed25519Provider extends core.Ed25519Provider {
-  public async onSign(_algorithm: string, key: core.CryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
-    return askarKeySign(key, data)
+export class EcdsaProvider extends core.EcdsaProvider {
+  public async onSign(algorithm: EcdsaParams, key: core.CryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
+    if (algorithm.hash.name !== 'SHA-256') {
+      throw new Error(`Invalid hashing algorithm. Expected: 'SHA-256', received: ${algorithm.hash.name}`)
+    }
+
+    const signature = askarKeySign({ key, data })
+
+    return signature
   }
 
   public async onVerify(
-    _algorithm: string,
+    algorithm: EcdsaParams,
     key: core.CryptoKey,
     signature: ArrayBuffer,
     data: ArrayBuffer
   ): Promise<boolean> {
-    return askarKeyVerify(key, data, signature)
+    if (algorithm.hash.name !== 'SHA-256') {
+      throw new Error(`Invalid hashing algorithm. Expected: 'SHA-256', received: ${algorithm.hash.name}`)
+    }
+
+    const isValid = askarKeyVerify({ key, data, signature })
+
+    return isValid
   }
 
   public async onGenerateKey(
-    algorithm: { name: string },
-    _extractable: boolean,
-    _keyUsages: string[]
+    algorithm: EcKeyGenParams,
+    extractable: boolean,
+    keyUsages: KeyUsage[]
   ): Promise<CryptoKeyPair> {
-    return askarKeyGenerate(algorithm.name)
+    const key = askarKeyGenerate({ algorithm, extractable, keyUsages })
+
+    return key
+  }
+
+  public async onExportKey(format: KeyFormat, key: core.CryptoKey): Promise<JsonWebKey | ArrayBuffer> {
+    switch (format.toLowerCase()) {
+      case 'spki': {
+        const publicKeyInfo = new SubjectPublicKeyInfo({
+          algorithm: ecdsaWithSHA256,
+          subjectPublicKey: askarKeyGetPublicBytes(key).buffer,
+        })
+
+        const derEncoded = AsnConvert.serialize(publicKeyInfo)
+        return derEncoded
+      }
+      case 'jwk':
+        return askarExportKeyToJwk(key)
+      case 'raw':
+        return askarKeyGetPublicBytes(key).buffer
+      default:
+        throw new Error(`Not supported format: ${format}`)
+    }
+  }
+
+  public async onImportKey(
+    format: KeyFormat,
+    keyData: JsonWebKey | ArrayBuffer,
+    _algorithm: EcKeyImportParams,
+    extractable: boolean,
+    keyUsages: KeyUsage[]
+  ): Promise<core.CryptoKey> {
+    if (format !== 'jwk' && ArrayBuffer.isView(keyData)) {
+      throw new core.OperationError('non-jwk formats can only be used with an ArrayBuffer')
+    }
+
+    switch (format.toLowerCase()) {
+      case 'jwk':
+        return askarKeyFromJwk({
+          extractable,
+          keyUsages,
+          keyData: keyData as JsonWebKey,
+        })
+      default:
+        throw new core.OperationError("Only format 'jwt' is supported for importing keys")
+    }
   }
 }
