@@ -12,6 +12,10 @@
     "url": "https://github.com/animo/askar-webcrypto/issues",
     "email": "development@animo.id"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["build"],
   "scripts": {
     "build": "tsc",
     "format": "biome format .",
