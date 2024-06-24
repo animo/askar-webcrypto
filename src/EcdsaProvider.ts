@@ -107,7 +107,9 @@ export class EcdsaProvider extends core.EcdsaProvider {
         })
       }
       default:
-        throw new core.OperationError(`Only format 'jwt' is supported for importing keys. Received: ${format}`)
+        throw new core.OperationError(
+          `Only format 'jwt' and 'spki' are supported for importing keys. Received: ${format}`
+        )
     }
   }
 }
