@@ -36,6 +36,8 @@ describe('x509', async () => {
           { type: 'dns', value: 'paradym.id' },
           { type: 'dns', value: 'wallet.paradym.id' },
         ]),
+        new x509.SubjectAlternativeNameExtension([{ type: 'dns', value: 'animo.id' }]),
+        new x509.SubjectAlternativeNameExtension([{ type: 'url', value: 'animo.id' }]),
       ],
     })
 
@@ -66,21 +68,9 @@ describe('x509', async () => {
 
     const jwkPublic = await crypto.subtle.exportKey('jwk', askarKeys.publicKey)
 
-    const nodejsPrivateKey = await webCrypto.subtle.importKey(
-      'jwk',
-      jwkPrivate,
-      { name: 'ECDSA', namedCurve: 'P-256', hash: { name: 'SHA-256' } },
-      true,
-      ['sign']
-    )
+    const nodejsPrivateKey = await webCrypto.subtle.importKey('jwk', jwkPrivate, alg, true, ['sign'])
 
-    const nodejsPublicKey = await webCrypto.subtle.importKey(
-      'jwk',
-      jwkPublic,
-      { name: 'ECDSA', namedCurve: 'P-256', hash: { name: 'SHA-256' } },
-      true,
-      ['verify']
-    )
+    const nodejsPublicKey = await webCrypto.subtle.importKey('jwk', jwkPublic, alg, true, ['verify'])
 
     const now = new Date()
 
@@ -134,5 +124,58 @@ describe('x509', async () => {
 
     assert(isValidNodejsCertificate)
     assert(isValidAskarCertificate)
+  })
+
+  it('Validate a certificate chain', async () => {
+    const crypto = new Crypto()
+    x509.cryptoProvider.set(crypto)
+
+    const alg = {
+      name: 'ECDSA',
+      namedCurve: 'p-256',
+      hash: 'SHA-256',
+    }
+
+    const rootKeys = await crypto.subtle.generateKey(alg, true, ['sign', 'verify'])
+    const rootCert = await x509.X509CertificateGenerator.createSelfSigned({
+      serialNumber: '01',
+      name: 'CN=Root',
+      notBefore: new Date(),
+      notAfter: new Date(),
+      keys: rootKeys,
+      signingAlgorithm: alg,
+    })
+
+    const intermediateKeys = await crypto.subtle.generateKey(alg, true, ['sign', 'verify'])
+    const intermediateCert = await x509.X509CertificateGenerator.create({
+      serialNumber: '02',
+      subject: 'CN=Intermediate',
+      issuer: rootCert.subject,
+      notBefore: new Date(),
+      notAfter: new Date(),
+      signingKey: rootKeys.privateKey,
+      publicKey: intermediateKeys.publicKey,
+      signingAlgorithm: alg,
+    })
+
+    const leafKeys = await crypto.subtle.generateKey(alg, true, ['sign', 'verify'])
+    const leafCert = await x509.X509CertificateGenerator.create({
+      serialNumber: '03',
+      subject: 'CN=Leaf',
+      issuer: intermediateCert.subject,
+      notBefore: new Date(),
+      notAfter: new Date(),
+      signingKey: intermediateKeys.privateKey,
+      publicKey: leafKeys.publicKey,
+      signingAlgorithm: alg,
+    })
+
+    const chain = new x509.X509ChainBuilder({
+      certificates: [rootCert, intermediateCert],
+    })
+
+    const items = await chain.build(leafCert)
+
+    assert.strictEqual(items.length, 3)
   })
 })

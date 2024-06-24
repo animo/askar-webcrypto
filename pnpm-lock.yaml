@@ -26,9 +26,6 @@ importers:
       '@peculiar/asn1-x509':
         specifier: ^2.3.8
         version: 2.3.8
-      '@peculiar/webcrypto':
-        specifier: ^1.5.0
-        version: 1.5.0
       webcrypto-core:
         specifier: ^1.8.0
         version: 1.8.0
@@ -39,6 +36,9 @@ importers:
       '@hyperledger/aries-askar-nodejs':
         specifier: ^0.2.1
         version: 0.2.1(encoding@0.1.13)
+      '@peculiar/webcrypto':
+        specifier: ^1.5.0
+        version: 1.5.0
       '@peculiar/x509':
         specifier: ^1.11.0
         version: 1.11.0
