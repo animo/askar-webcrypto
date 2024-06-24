@@ -1,5 +1,5 @@
 import { before, describe, it } from 'node:test'
-import assert from 'node:assert'
+import assert, { strict, strictEqual } from 'node:assert'
 
 import { Crypto as WebCrypto } from '@peculiar/webcrypto'
 
@@ -171,11 +171,63 @@ describe('x509', async () => {
     })
 
     const chain = new x509.X509ChainBuilder({
-      certificates: [rootCert, intermediateCert],
+      certificates: [rootCert, intermediateCert, leafCert],
     })
 
     const items = await chain.build(leafCert)
 
-    assert.strictEqual(items.length, 3)
+    const encodedChain = items.map((i) => i.toString('base64'))
+
+    const cert = new x509.X509Certificate(encodedChain[encodedChain.length - 1])
+    console.log(cert.subject)
+
+    strictEqual(items.length, 3)
+  })
+
+  /**
+   *
+   * The encoded chain is created by the function above and calling:
+   *
+   * ```js
+   * const encodedChain = items.reverse().map((i) => i.toString('base64'))
+   *
+   * ```
+   *
+   * NOTE: it is important to call `reverse`, otherwise the expected order of the `x509.X509ChainBuilder` is incorrect
+   *
+   * It can be checked by the following code:
+   *
+   * ```js
+   *
+   *  const encodedChain = items.map((i) => i.toString("base64"));
+   *  const expectedLeafCertificate = encodedChain[encodedChain.length - 1]
+   *
+   *  const cert = new x509.X509Certificate(expectedLeafCertificate);
+   *
+   *  console.log(cert.subject); // It is expected that the last item has `CN=LEAF`, but actually contains: `CN=ROOT`
+   *
+   * ```
+   */
+  it('validate encoded chain', async () => {
+    const encodedChain = [
+      // ROOT CERTIFICATE
+      'MIHkMIGMoAMCAQICAQEwCgYIKoZIzj0EAwIwDzENMAsGA1UEAxMEUm9vdDAeFw0yNDA2MjQxMzI1NTJaFw0yNDA2MjQxMzI1NTJaMA8xDTALBgNVBAMTBFJvb3QwMDAKBggqhkjOPQQDAgMiAAI8UeZJn45YWj4WHv3bTCezXxPuhwtkk3F3u6msCf9ToKMCMAAwCgYIKoZIzj0EAwIDRwAwRAIgblzGh8QPLCTdgYrH3tJNWLhs0aSQjf4KrIPjPU9XiK8CIG5EBhnNsGHcOhETKlZC+mT5Eb0FRw7Oj/EibNPpHMtY',
+
+      // INTERMEDIATE CERTIFICATE
+      'MIHsMIGUoAMCAQICAQIwCgYIKoZIzj0EAwIwDzENMAsGA1UEAxMEUm9vdDAeFw0yNDA2MjQxMzI1NTJaFw0yNDA2MjQxMzI1NTJaMBcxFTATBgNVBAMTDEludGVybWVkaWF0ZTAwMAoGCCqGSM49BAMCAyIAAnprwUeUM02E/s4SpOEWQJEdQDTcJ64gLOe6R6QxJ9CzowIwADAKBggqhkjOPQQDAgNHADBEAiB4PajeNPEF3CnE9SG01b3JhAASRLY9lOC9357FtVbAFQIga2mPVAnc1CZrmxzdigcVJqqZlzTmBtdmXkSIt5sbnjg=',
+
+      // LEAF CERTIFICATE
+      'MIHtMIGUoAMCAQICAQMwCgYIKoZIzj0EAwIwFzEVMBMGA1UEAxMMSW50ZXJtZWRpYXRlMB4XDTI0MDYyNDEzMjU1MloXDTI0MDYyNDEzMjU1MlowDzENMAsGA1UEAxMETGVhZjAwMAoGCCqGSM49BAMCAyIAAgwXycvPjUv6wyTw8WpwkAdoc/NRdwdorltTi6LnPjTpowIwADAKBggqhkjOPQQDAgNIADBFAiEA14IOiIAJCgKMMpKUxee+UmU/W27DWG4P5tm1TdRyaWMCIFuX01CBJa9lFeJyenDR2Y4PER/H/mFsY3pSkbHCkyXa',
+    ]
+
+    const parsedChain = encodedChain.map((e) => new x509.X509Certificate(e))
+
+    const chain = new x509.X509ChainBuilder({
+      certificates: parsedChain,
+    })
+
+    const validatedChain = await chain.build(parsedChain[parsedChain.length - 1])
+
+    strictEqual(validatedChain.length, 3)
   })
 })
