@@ -4,13 +4,12 @@ import { ecdsaWithSHA256 } from '@peculiar/asn1-ecc'
 import * as core from 'webcrypto-core'
 import {
   askarExportKeyToJwk,
-  askarKeyFromSecretBytes,
-  askarKeyFromPublicBytes,
   askarKeyGenerate,
   askarKeyGetPublicBytes,
   askarKeySign,
   askarKeyVerify,
   askarKeyFromJwk,
+  askarKeyFromPublicBytes,
 } from './askar'
 import type {
   CryptoKeyPair,
@@ -81,7 +80,7 @@ export class EcdsaProvider extends core.EcdsaProvider {
   public async onImportKey(
     format: KeyFormat,
     keyData: JsonWebKey | ArrayBuffer,
-    _algorithm: EcKeyImportParams,
+    algorithm: EcKeyImportParams,
     extractable: boolean,
     keyUsages: KeyUsage[]
   ): Promise<core.CryptoKey> {
@@ -96,8 +95,19 @@ export class EcdsaProvider extends core.EcdsaProvider {
           keyUsages,
           keyData: keyData as JsonWebKey,
         })
+      case 'spki': {
+        const keyInfo = AsnParser.parse(new Uint8Array(keyData as ArrayBuffer), core.asn1.PublicKeyInfo)
+
+        return askarKeyFromPublicBytes({
+          format,
+          keyData: new Uint8Array(keyInfo.publicKey),
+          keyUsages,
+          extractable,
+          algorithm,
+        })
+      }
       default:
-        throw new core.OperationError("Only format 'jwt' is supported for importing keys")
+        throw new core.OperationError(`Only format 'jwt' is supported for importing keys. Received: ${format}`)
     }
   }
 }

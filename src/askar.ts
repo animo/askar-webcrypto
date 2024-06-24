@@ -1,6 +1,6 @@
+import { CryptoBox, Jwk, Key, KeyAlgs } from '@hyperledger/aries-askar-shared'
 import type * as core from 'webcrypto-core'
 import { getCryptoKey, setCryptoKey } from './storage'
-import { Key, type KeyAlgs, CryptoBox, Jwk } from '@hyperledger/aries-askar-shared'
 import type { EcKeyGenParams, EcKeyImportParams, JsonWebKey, KeyFormat, KeyUsage } from './types'
 
 const CBOX_NONCE_LENGTH = 24
@@ -176,4 +176,6 @@ export const askarKeyFromJwk = ({
 
 // TODO: this needs a proper conversion
 const cryptoAlgorithmToAskarAlgorithm = (algorithm: EcKeyGenParams) =>
-  (algorithm.namedCurve ? algorithm.namedCurve : algorithm.name) as KeyAlgs
+  algorithm.name === 'ECDSA'
+    ? KeyAlgs.EcSecp256r1
+    : ((algorithm.namedCurve ? algorithm.namedCurve : algorithm.name) as KeyAlgs)
