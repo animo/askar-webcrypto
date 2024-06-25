@@ -9,9 +9,7 @@ class Subtle extends core.SubtleCrypto {
     super()
 
     this.providers.set(new EcdsaProvider())
-
     this.providers.set(new Ed25519Provider())
-
     this.providers.set(new Sha1Provider())
   }
 }
