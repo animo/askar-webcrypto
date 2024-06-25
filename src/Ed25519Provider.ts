@@ -1,19 +1,21 @@
 import * as core from 'webcrypto-core'
-import { askarKeyGenerate, askarKeySign, askarKeyVerify } from './askar'
-import type { CryptoKeyPair, EcKeyGenParams, KeyUsage } from './types'
+import type { CryptoKeyPair, EcKeyGenParams, KeySignParams, KeyUsage } from './types'
+import { AskarCryptoKey, assertIsAskarCryptoKey } from './CryptoKey'
 
 export class Ed25519Provider extends core.Ed25519Provider {
-  public async onSign(_algorithm: string, key: core.CryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
-    return askarKeySign({ key, data })
+  public async onSign(algorithm: KeySignParams, key: AskarCryptoKey, data: ArrayBuffer): Promise<ArrayBuffer> {
+    assertIsAskarCryptoKey(key)
+    return key.sign(algorithm, data)
   }
 
   public async onVerify(
-    _algorithm: string,
-    key: core.CryptoKey,
+    algorithm: KeySignParams,
+    key: AskarCryptoKey,
     signature: ArrayBuffer,
     data: ArrayBuffer
   ): Promise<boolean> {
-    return askarKeyVerify({ key, data, signature })
+    assertIsAskarCryptoKey(key)
+    return key.verify(algorithm, signature, data)
   }
 
   public async onGenerateKey(
@@ -21,6 +23,20 @@ export class Ed25519Provider extends core.Ed25519Provider {
     extractable: boolean,
     keyUsages: KeyUsage[]
   ): Promise<CryptoKeyPair> {
-    return askarKeyGenerate({ algorithm, keyUsages, extractable })
+    const privateKey = AskarCryptoKey.create(algorithm, 'private', extractable, keyUsages)
+
+    // Create a public key from the private as internally they refer to the same key
+    const publicKey = new AskarCryptoKey({
+      askarKey: privateKey.askarKey,
+      extractable,
+      algorithm,
+      usages: keyUsages,
+      type: 'public',
+    })
+
+    return {
+      publicKey,
+      privateKey,
+    }
   }
 }

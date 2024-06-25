@@ -23,6 +23,9 @@ importers:
       '@peculiar/asn1-x509':
         specifier: ^2.3.8
         version: 2.3.8
+      dtor:
+        specifier: ^0.1.2
+        version: 0.1.2
       webcrypto-core:
         specifier: ^1.8.0
         version: 1.8.0
@@ -764,6 +767,9 @@ packages:
   dot-prop@6.0.1:
     resolution: {integrity: sha512-tE7ztYzXHIeyvc7N+hR3oi7FIbf/NIjVP9hmAt3yMXzrQ072/fpjGLx2GxNxGxUl5V73MEqYzioOMoVhGMJ5cA==}
     engines: {node: '>=10'}
+
+  dtor@0.1.2:
+    resolution: {integrity: sha512-hdDEJIR5VfdE2VuCxnaWi/7lNOUTkISvDS5gsbQtZ0jfPpTeX4ihd/+8mJG5Su/6Y+GLPAMLrJK0MS4OVjKeAw==}
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -2794,6 +2800,8 @@ snapshots:
   dot-prop@6.0.1:
     dependencies:
       is-obj: 2.0.0
+
+  dtor@0.1.2: {}
 
   eastasianwidth@0.2.0: {}
 

@@ -1,9 +1,9 @@
 import type { Jwk } from '@hyperledger/aries-askar-shared'
-import type * as core from 'webcrypto-core'
+import type { AskarCryptoKey } from './CryptoKey'
 
 export type CryptoKeyPair = {
-  publicKey: core.CryptoKey
-  privateKey: core.CryptoKey
+  publicKey: AskarCryptoKey
+  privateKey: AskarCryptoKey
 }
 
 export type EcdsaParams = {
@@ -11,15 +11,24 @@ export type EcdsaParams = {
   hash: { name: 'SHA-256' | 'SHA-384' | 'SHA-512' }
 }
 
+// TODO: imporove name of `KeySignParams`
+export type KeySignParams = EcdsaParams
+
 export type EcKeyGenParams = {
   name: 'ECDSA'
   namedCurve: 'P-256'
+  hash?: { name: 'SHA-256' }
 }
+
+export type KeyAlgorithm = EcKeyGenParams
 
 export type EcKeyImportParams = {
   name: 'ECDSA'
   namedCurve: 'P-256'
+  hash?: { name: 'SHA-256' }
 }
+
+export type KeyImportParams = EcKeyImportParams
 
 export type KeyUsage = 'sign' | 'verify'
 export type KeyFormat = 'jwk' | 'pkcs8' | 'spki' | 'raw'

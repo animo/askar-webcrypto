@@ -1,5 +1,5 @@
 import { before, describe, it } from 'node:test'
-import assert, { strict, strictEqual } from 'node:assert'
+import assert, { strictEqual } from 'node:assert'
 
 import { Crypto as WebCrypto } from '@peculiar/webcrypto'
 

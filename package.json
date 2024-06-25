@@ -32,6 +32,7 @@
     "@peculiar/asn1-ecc": "^2.3.8",
     "@peculiar/asn1-schema": "^2.3.8",
     "@peculiar/asn1-x509": "^2.3.8",
+    "dtor": "^0.1.2",
     "webcrypto-core": "^1.8.0"
   },
   "devDependencies": {
