@@ -22,7 +22,7 @@
     "format:fix": "pnpm format --write",
     "lint": "biome lint .",
     "lint:fix": "pnpm lint --write --unsafe",
-    "check-types": "pnpm build --noEmit",
+    "types:check": "pnpm build --noEmit",
     "test": "node --import tsx --test ./tests/*.test.ts",
     "release": "release-it"
   },
@@ -32,11 +32,13 @@
     "@peculiar/asn1-ecc": "^2.3.8",
     "@peculiar/asn1-schema": "^2.3.8",
     "@peculiar/asn1-x509": "^2.3.8",
-    "dtor": "^0.1.2",
     "webcrypto-core": "^1.8.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.1",
+    "@credo-ts/askar": "0.5.3",
+    "@credo-ts/core": "0.5.3",
+    "@credo-ts/node": "0.5.3",
     "@hyperledger/aries-askar-nodejs": "^0.2.1",
     "@peculiar/webcrypto": "^1.5.0",
     "@peculiar/x509": "^1.11.0",
@@ -44,5 +46,8 @@
     "release-it": "^17.3.0",
     "tsx": "^4.15.2",
     "typescript": "~5.4.5"
+  },
+  "peerDependencies": {
+    "@credo-ts/core": "*"
   }
 }

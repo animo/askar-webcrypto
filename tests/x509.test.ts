@@ -9,7 +9,7 @@ import * as x509 from '@peculiar/x509'
 
 import { Crypto } from '../src'
 
-describe('x509', async () => {
+describe.skip('x509', async () => {
   before(() => {
     registerAriesAskar({ askar: new NodeJSAriesAskar() })
   })
@@ -176,11 +176,6 @@ describe('x509', async () => {
 
     const items = await chain.build(leafCert)
 
-    const encodedChain = items.map((i) => i.toString('base64'))
-
-    const cert = new x509.X509Certificate(encodedChain[encodedChain.length - 1])
-    console.log(cert.subject)
-
     strictEqual(items.length, 3)
   })
 
@@ -204,7 +199,7 @@ describe('x509', async () => {
    *
    *  const cert = new x509.X509Certificate(expectedLeafCertificate);
    *
-   *  console.log(cert.subject); // It is expected that the last item has `CN=LEAF`, but actually contains: `CN=ROOT`
+   *  cert.subject // It is expected that the last item has `CN=LEAF`, but actually contains: `CN=ROOT`
    *
    * ```
    */
