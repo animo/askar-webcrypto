@@ -1,9 +1,15 @@
 import type { Jwk } from '@hyperledger/aries-askar-shared'
 import type { AskarCryptoKey } from './CryptoKey'
+import type { CallbackCryptoKey } from './CallbackKey'
 
 export type CryptoKeyPair = {
   publicKey: AskarCryptoKey
   privateKey: AskarCryptoKey
+}
+
+export type CallbackCryptoKeyPair<T> = {
+  publicKey: CallbackCryptoKey<T>
+  privateKey: CallbackCryptoKey<T>
 }
 
 export type EcdsaParams = {
@@ -13,6 +19,8 @@ export type EcdsaParams = {
 
 // TODO: imporove name of `KeySignParams`
 export type KeySignParams = EcdsaParams
+
+export type KeyVerifyParams = EcdsaParams
 
 export type EcKeyGenParams = {
   name: 'ECDSA'

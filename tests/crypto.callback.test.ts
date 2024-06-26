@@ -8,8 +8,14 @@ import { registerAriesAskar } from '@hyperledger/aries-askar-shared'
 // @ts-ignore
 global.crypto = undefined
 
-import { Crypto } from '../src'
+import { type Callbacks, Crypto, CryptoCallback } from '../src'
 import { generateAsymmetricKeyTests } from './utils/genKeyTests'
+import type { AskarCryptoKey } from '../src/CryptoKey'
+
+const callbacks: Callbacks = {
+  sign: (key: AskarCryptoKey, message: Uint8Array) =>
+    Promise.resolve(key.sign({ hash: { name: 'SHA-256' }, name: 'ECDSA' }, message)),
+}
 
 describe.skip('crypto', async () => {
   before(() => {
@@ -18,7 +24,7 @@ describe.skip('crypto', async () => {
 
   describe('random', async () => {
     it('generate random bytes', async () => {
-      const crypto = new Crypto()
+      const crypto = new CryptoCallback(callbacks)
       const buf = new Uint8Array(100)
       const sameBuf = crypto.getRandomValues(buf)
       strictEqual(buf, sameBuf)
@@ -38,7 +44,7 @@ describe.skip('crypto', async () => {
       ['sign', 'verify']
     )
 
-    const p256KeyAskar = await new Crypto().subtle.generateKey(
+    const p256KeyAskar = await new CryptoCallback(callbacks).subtle.generateKey(
       {
         name: 'ECDSA',
         namedCurve: 'P-256',
@@ -55,7 +61,7 @@ describe.skip('crypto', async () => {
     strictEqual(publicKeyNodejs.byteLength, 65)
   })
 
-  generateAsymmetricKeyTests(new Crypto(), [
+  generateAsymmetricKeyTests(new CryptoCallback(callbacks), [
     { name: 'ed25519' },
     { name: 'ECDSA', namedCurve: 'P-256', hash: { name: 'SHA-256' } },
   ])
