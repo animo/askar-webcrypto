@@ -1,6 +1,6 @@
 {
   "name": "@animo-id/askar-webcrypto",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "build/index.js",
   "author": "Animo Solutions <development@animo.id> (https://www.animo.id)",
   "repository": {
